@@ -137,7 +137,11 @@ export default function App() {
 
       // 2. Trigger SMS via Vercel Serverless Function
       try {
-        await fetch('/api/send-sms', {
+        const smsEndpoint = window.location.hostname.includes("vercel.app")
+          ? "/api/send-sms"
+          : "https://parsian.vercel.app/api/send-sms";
+
+        await fetch(smsEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
