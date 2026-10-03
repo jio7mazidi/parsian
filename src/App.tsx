@@ -146,7 +146,6 @@ export default function App() {
             parameters: [
               { name: 'NAME', value: patientName },
               { name: 'SERVICE', value: selectedServiceObj ? selectedServiceObj.name : 'درمانگاه پارسیان' },
-              { name: 'DATE', value: formatJalali(selectedDate) },
               { name: 'CODE', value: trackingCode }
             ]
           })
