@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Stethoscope, Phone, Clock, MapPin, Calendar, Award, 
   ChevronLeft, Menu, X, CheckCircle2, HeartPulse, Activity, User, 
-  Sparkles, Smile
+  Sparkles, Smile, ShieldCheck
 } from "lucide-react";
 import { cn } from "./lib/utils";
 import { formatJalali } from "./lib/jalali";
 import { isIranMobile } from "./lib/persian";
 import { supabase } from "./lib/supabase";
+import ReceptionPanel from "./components/ReceptionPanel";
 
 // Data
 const SERVICE_CATEGORIES = [
@@ -82,8 +83,19 @@ const SPECIALIST_DOCTORS = [
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"home" | "services" | "doctors" | "booking" | "contact">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "services" | "doctors" | "booking" | "contact" | "reception">("home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleHash = () => {
+      if (window.location.hash === "#reception") {
+        setActiveTab("reception");
+      }
+    };
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
 
   // Booking state
   const [selectedService, setSelectedService] = useState(ALL_SERVICES[0].id);
@@ -134,6 +146,7 @@ export default function App() {
             parameters: [
               { name: 'NAME', value: patientName },
               { name: 'SERVICE', value: selectedServiceObj ? selectedServiceObj.name : 'درمانگاه پارسیان' },
+              { name: 'DATE', value: formatJalali(selectedDate) },
               { name: 'CODE', value: trackingCode }
             ]
           })
@@ -251,6 +264,19 @@ export default function App() {
                   {item.label}
                 </button>
               ))}
+            </div>
+
+            <div className="pt-4 mt-2 border-t border-[var(--border)]">
+              <button
+                onClick={() => { setActiveTab("reception"); setMobileMenuOpen(false); window.location.hash = "reception"; }}
+                className={cn(
+                  "w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold transition-colors cursor-pointer",
+                  activeTab === "reception" ? "bg-amber-500 text-black" : "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                )}
+              >
+                <span>پنل پذیرش منشی</span>
+                <ShieldCheck className="size-4" />
+              </button>
             </div>
           </div>
         </div>
@@ -586,6 +612,16 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* Reception / Admin View */}
+        {activeTab === "reception" && (
+          <ReceptionPanel 
+            onBackToSite={() => {
+              setActiveTab("home");
+              window.location.hash = "";
+            }} 
+          />
+        )}
       </main>
 
       {/* Footer */}
@@ -597,12 +633,22 @@ export default function App() {
             </div>
             <span>درمانگاه شبانه‌روزی پارسیان عباس‌آباد · ۱۴۰۵</span>
           </div>
-          <div className="flex gap-6">
-            <button onClick={() => setActiveTab("home")} className="hover:text-amber-400 cursor-pointer">خانه</button>
-            <button onClick={() => setActiveTab("services")} className="hover:text-amber-400 cursor-pointer">خدمات</button>
-            <button onClick={() => setActiveTab("doctors")} className="hover:text-amber-400 cursor-pointer">پزشکان</button>
-            <button onClick={() => setActiveTab("booking")} className="hover:text-amber-400 cursor-pointer">نوبت‌دهی</button>
-            <button onClick={() => setActiveTab("contact")} className="hover:text-amber-400 cursor-pointer">تماس</button>
+          <div className="flex flex-wrap gap-4 sm:gap-6 items-center">
+            <button onClick={() => { setActiveTab("home"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">خانه</button>
+            <button onClick={() => { setActiveTab("services"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">خدمات</button>
+            <button onClick={() => { setActiveTab("doctors"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">پزشکان</button>
+            <button onClick={() => { setActiveTab("booking"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">نوبت‌دهی</button>
+            <button onClick={() => { setActiveTab("contact"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">تماس</button>
+            <button 
+              onClick={() => {
+                setActiveTab("reception");
+                window.location.hash = "reception";
+              }} 
+              className="flex items-center gap-1 text-amber-400/80 hover:text-amber-300 font-bold cursor-pointer"
+            >
+              <ShieldCheck className="size-3.5" />
+              پنل پذیرش منشی
+            </button>
           </div>
         </div>
       </footer>

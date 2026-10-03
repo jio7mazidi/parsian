@@ -1,32 +1,77 @@
-# React + TypeScript + Vite
+# 🏥 وب‌سایت درمانگاه شبانه‌روزی پارسیان عباس‌آباد
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+وب‌سایت رسمی و سامانه یکپارچه نوبت‌دهی آنلاین و مدیریت پذیرش **درمانگاه شبانه‌روزی پارسیان عباس‌آباد** (مازندران).
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 تکنولوژی‌ها و پشته فنی (Tech Stack)
 
-## React Compiler
+* **فرانت‌اند:** React 19 + TypeScript + Vite
+* **استایل‌دهی و طراحی:** Tailwind CSS v4 + تم اختصاصی Graphite Dark
+* **تایپوگرافی:** بارگذاری بومی و ۱۰۰٪ آفلاین فونت وزیرمتن (`@fontsource/vazirmatn`)
+* **آیکون‌ها:** Lucide React
+* **تقویم و تاریخ:** الگوریتم شمسی جلالی بدون وابستگی به کتابخانه‌های سنگین خارجی
+* **پایگاه داده:** PostgreSQL ابری روی سرویس [Supabase](https://supabase.com)
+* **سرورلس و پیامک:** Vercel Serverless Function (`/api/send-sms`) متصل به وب‌سرویس پترن و ارسال سریع [SMS.ir](https://sms.ir)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the Oxlint configuration
+## ✨ امکانات و بخش‌های سامانه
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+### ۱. پورتال عمومی بیماران
+* **نوار اورژانس شبانه‌روزی:** دسترسی فوری به شماره تماس مستقیم (`۰۱۱۵۴۶۲۷۰۲۲`) و اعلام آماده‌باش ۲۴ ساعته.
+* **کادر ۱۰ نفره پزشکان مقیم اورژانس:**
+  * دکتر محمد محبعلی، دکتر جواد مزیدی، دکتر عباس رحیمی، دکتر کریم جهانشاهی، دکتر مبین رضایی، دکتر فروردین، دکتر اسدی، دکتر لطفعلی ثانی، دکتر فتحعلی نژاد و دکتر رهنورد.
+* **برنامه هفتگی متخصصین کلینیک:**
+  * شنبه‌ها: دکتر زانوسی (ارتوپد)
+  * یکشنبه‌ها: دکتر علینژاد (زنان)
+  * دوشنبه‌ها: دکتر نیک‌سیرت (گوارش)
+  * سه‌شنبه‌ها: دکتر شورمیج (قلب) و دکتر صالحی (مغز و اعصاب)
+  * چهارشنبه‌ها: دکتر جورابراهیمیان (داخلی)
+  * برنامه هفتگی: دکتر جواد مزیدی (تغذیه) و دکتر محمد محبعلی (زیبایی)
+* **خدمات کلینیک:** اورژانس، تزریقات و سرم‌تراپی، جراحی‌های سرپایی، پوست و زیبایی (فیلر، بوتاکس، مزوتراپی، هایفو، لیزر) و دندانپزشکی.
+* **فرم نوبت‌دهی آنلاین:** انتخاب خدمت، تقویم شمسی هوشمند و اعتبارسنجی پیشرفته شماره موبایل همراه ایران.
+* **صدور کد رهگیری اختصاصی:** تولید کد رهگیری منحصربه‌فرد برای هر نوبت (مثلاً `PRS-400048`).
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+---
+
+### ۲. 🛡️ پنل اختصاصی منشی و مدیریت پذیرش (`#reception`)
+* **ورود امن:** محافظت‌شده با رمز عبور جهت استفاده منشی و کادر پذیرش درمانگاه (رمز پیش‌فرض: `parsian1405`).
+* **دسترسی مستقیم:** از طریق لینک در فوتر سایت، منوی موبایل یا آدرس مستقیم `/#reception`.
+* **کارت‌های آمار لحظه‌ای:** نمایش تعداد کل نوبت‌ها، در انتظار بررسی/تماس، تأییدشده و ویزیت‌شده.
+* **جستجو و فیلتر پیشرفته:** جستجوی آنی بر اساس نام بیمار، شماره تماس و کد پیگیری نوبت.
+* **تماس مستقیم با بیمار:** دکمه سریع تماس تلفنی مستقیم با بیمار با یک کلیک.
+* **تغییر وضعیت نوبت:** امکان تغییر وضعیت به «تأیید شد»، «ویزیت انجام شد» و «لغو شد».
+* **خروجی اکسل (CSV Export):** امکان دانلود فوری گزارش نوبت‌ها به صورت فایل اکسل سازگار با زبان فارسی (UTF-8 BOM).
+
+---
+
+## ⚙️ راه‌اندازی و توسعه محلی (Local Development)
+
+```bash
+# نصب پکیج‌ها
+npm install
+
+# اجرای محیط توسعه
+npm run dev
+
+# بررسی لغزش‌ها و خطاها
+npm run lint
+
+# بیلد نهایی پروژه
+npm run build
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+---
+
+## 🔑 متغیرهای محیطی مورد نیاز در Vercel
+
+در پنل Vercel پروژه، متغیر محیطی زیر را تنظیم فرمایید:
+* `SMS_IR_API_KEY`: کلید دریافتی از پنل توسعه‌دهندگان سامانه SMS.ir
+
+---
+
+## 🏥 اطلاعات درمانگاه
+* **آدرس:** مازندران، عباس‌آباد، خیابان اصلی، روبروی شهرداری، درمانگاه شبانه‌روزی پارسیان
+* **تلفن مستقیم:** ۰۱۱۵۴۶۲۷۰۲۲
+* **ساعت پذیرش:** ۲۴ ساعته شبانه‌روزی، بدون تعطیلی
