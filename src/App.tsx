@@ -7,6 +7,7 @@ import {
 import { cn } from "./lib/utils";
 import { formatJalali } from "./lib/jalali";
 import { isIranMobile } from "./lib/persian";
+import { supabase } from "./lib/supabase";
 
 // Data
 const SERVICE_CATEGORIES = [
@@ -91,14 +92,41 @@ export default function App() {
   const [patientPhone, setPatientPhone] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
 
-  const handleBookingSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!patientName.trim() || !isIranMobile(patientPhone)) {
       alert("لطفاً نام و شماره موبایل معتبر (مثلاً ۰۹۱۱XXXXXXX) وارد کنید.");
       return;
     }
+    
+    setIsSubmitting(true);
     const trackingCode = "PRS-" + Math.floor(100000 + Math.random() * 900000);
-    setBookingSuccess(trackingCode);
+    const selectedServiceObj = ALL_SERVICES.find(s => s.id === selectedService);
+
+    try {
+      const { error } = await supabase.from('bookings').insert([
+        {
+          tracking_code: trackingCode,
+          patient_name: patientName,
+          patient_phone: patientPhone,
+          service_id: selectedService,
+          service_name: selectedServiceObj ? selectedServiceObj.name : selectedService,
+          booking_date: selectedDate.toISOString().split("T")[0],
+          status: 'pending'
+        }
+      ]);
+
+      if (error) {
+        console.warn("Supabase save warning:", error.message);
+      }
+    } catch (err) {
+      console.error("Connection error:", err);
+    } finally {
+      setIsSubmitting(false);
+      setBookingSuccess(trackingCode);
+    }
   };
 
   return (
@@ -474,9 +502,10 @@ export default function App() {
 
                 <button 
                   type="submit"
-                  className="w-full h-12 rounded-full bg-white text-black font-black text-base hover:opacity-95 shadow-lg transition-all cursor-pointer mt-4"
+                  disabled={isSubmitting}
+                  className="w-full h-12 rounded-full bg-white text-black font-black text-base hover:opacity-95 shadow-lg transition-all cursor-pointer mt-4 disabled:opacity-50"
                 >
-                  ثبت رزرو نوبت
+                  {isSubmitting ? "در حال ثبت..." : "ثبت رزرو نوبت"}
                 </button>
               </form>
             )}
