@@ -21,7 +21,7 @@ export default function RegionalCoverage() {
             نزدیک‌ترین درمانگاه و کلینیک شبانه‌روزی به <span className="text-amber-400">متل قو</span> و <span className="text-emerald-400">نشتارود</span>
           </h2>
           <p className="text-sm sm:text-base text-[var(--muted-foreground)] leading-relaxed">
-            درمانگاه پارسیان واقع در عباس‌آباد (روبروی شهرداری)، به عنوان قطب درمانی غرب مازندران، نزدیک‌ترین مرکز مجهز پزشکی با دسترسی سریع ساحلی برای اهالی محترم و مسافران متل قو و نشتارود است.
+            درمانگاه پارسیان واقع در عباس‌آباد (خیابان امام، نبش کوچه شهید کلاهدوز)، به عنوان قطب درمانی غرب مازندران، نزدیک‌ترین مرکز مجهز پزشکی با دسترسی سریع ساحلی برای اهالی محترم و مسافران متل قو و نشتارود است.
           </p>
         </div>
 
@@ -101,7 +101,7 @@ export default function RegionalCoverage() {
                 مسیریابی مستقیم با یک کلیک به درمانگاه پارسیان:
               </h4>
               <p className="text-xs text-[var(--muted-foreground)] mt-0.5">
-                مازندران، عباس‌آباد، خیابان اصلی ساحلی، روبروی شهرداری عباس‌آباد
+                مازندران، عباس‌آباد، خیابان امام، نبش کوچه شهید کلاهدوز
               </p>
             </div>
             <a 
@@ -184,7 +184,7 @@ export default function RegionalCoverage() {
           <div className="p-3.5 rounded-xl bg-[var(--background)]/40 border border-[var(--border)]">
             <Car className="size-4 text-purple-400 mx-auto mb-1.5" />
             <span className="text-xs font-black block text-white">دسترسی آسان ساحلی</span>
-            <span className="text-[10px] text-[var(--muted-foreground)]">روبروی شهرداری</span>
+            <span className="text-[10px] text-[var(--muted-foreground)]">نبش کوچه کلاهدوز</span>
           </div>
         </div>
       </div>

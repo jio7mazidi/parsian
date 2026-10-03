@@ -5,12 +5,12 @@ import {
   Sparkles, Smile, ShieldCheck, Car, Zap
 } from "lucide-react";
 import { cn } from "./lib/utils";
-import { formatJalali } from "./lib/jalali";
 import { isIranMobile } from "./lib/persian";
 import { supabase } from "./lib/supabase";
 import ReceptionPanel from "./components/ReceptionPanel";
 import RegionalCoverage from "./components/RegionalCoverage";
 import FAQSection from "./components/FAQSection";
+import JalaliDatePicker from "./components/JalaliDatePicker";
 
 // Data
 const SERVICE_CATEGORIES = [
@@ -57,8 +57,11 @@ const SERVICE_CATEGORIES = [
   }
 ];
 
-// Flatten for booking select
+// Flatten for services
 const ALL_SERVICES = SERVICE_CATEGORIES.flatMap(cat => cat.items);
+
+// Exclude emergency & nursing from online appointment booking (walk-in 24/7 services)
+const BOOKING_SERVICES = ALL_SERVICES.filter(s => s.id !== "emergency" && s.id !== "nursing");
 
 const EMERGENCY_DOCTORS = [
   { name: "دکتر محمد محبعلی", role: "پزشک مقیم اورژانس", desc: "مسئول شیفت اورژانس و احیا" },
@@ -99,8 +102,8 @@ export default function App() {
     return () => window.removeEventListener("hashchange", handleHash);
   }, []);
 
-  // Booking state
-  const [selectedService, setSelectedService] = useState(ALL_SERVICES[0].id);
+  // Booking state (defaults to first bookable clinic service)
+  const [selectedService, setSelectedService] = useState(BOOKING_SERVICES[0].id);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [patientName, setPatientName] = useState("");
   const [patientPhone, setPatientPhone] = useState("");
@@ -512,13 +515,26 @@ export default function App() {
                             <p className="text-xs text-[var(--muted-foreground)] leading-relaxed">{s.desc}</p>
                           </div>
                           <div className="pt-6 mt-6 border-t border-[var(--border)]">
-                            <button 
-                              onClick={() => { setSelectedService(s.id); setActiveTab("booking"); }}
-                              className="w-full h-10 rounded-xl bg-white text-black font-black text-xs hover:bg-white/90 transition-colors cursor-pointer flex items-center justify-center gap-2"
-                            >
-                              <Calendar className="size-3.5" />
-                              رزرو نوبت آنلاین
-                            </button>
+                            {s.id === "emergency" || s.id === "nursing" ? (
+                              <div className="flex items-center justify-between text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3.5 py-2.5 rounded-xl border border-emerald-500/20">
+                                <span className="flex items-center gap-1.5">
+                                  <HeartPulse className="size-3.5 text-red-400 animate-pulse" />
+                                  پذیرش حضوری ۲۴ ساعته (بدون نوبت)
+                                </span>
+                                <a href="tel:01154627022" className="text-white hover:text-amber-400 flex items-center gap-1 font-mono text-[11px]" dir="ltr">
+                                  <Phone className="size-3" />
+                                  ۰۱۱۵۴۶۲۷۰۲۲
+                                </a>
+                              </div>
+                            ) : (
+                              <button 
+                                onClick={() => { setSelectedService(s.id); setActiveTab("booking"); }}
+                                className="w-full h-10 rounded-xl bg-white text-black font-black text-xs hover:bg-white/90 transition-colors cursor-pointer flex items-center justify-center gap-2"
+                              >
+                                <Calendar className="size-3.5" />
+                                رزرو نوبت آنلاین
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -654,7 +670,7 @@ export default function App() {
                     onChange={(e) => setSelectedService(e.target.value)}
                     className="w-full h-12 px-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)] text-xs font-bold focus:outline-none focus:border-amber-500 text-right cursor-pointer"
                   >
-                    {ALL_SERVICES.map((s) => (
+                    {BOOKING_SERVICES.map((s) => (
                       <option key={s.id} value={s.id}>
                         {s.name}
                       </option>
@@ -663,18 +679,8 @@ export default function App() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-xs font-bold text-white">۲. تاریخ مراجعه مد نظر:</label>
-                  <div className="p-4 rounded-xl bg-[var(--secondary)]/60 border border-[var(--border)] flex items-center justify-between">
-                    <span className="font-bold text-xs text-amber-400">
-                      {formatJalali(selectedDate, { weekday: true, year: true })}
-                    </span>
-                    <input 
-                      type="date"
-                      value={selectedDate.toISOString().split("T")[0]}
-                      onChange={(e) => setSelectedDate(new Date(e.target.value))}
-                      className="bg-[var(--background)] px-3 py-1.5 rounded-lg border border-[var(--border)] text-xs font-mono cursor-pointer"
-                    />
-                  </div>
+                  <label className="block text-xs font-bold text-white">۲. انتخاب تاریخ مراجعه (تقویم شمسی):</label>
+                  <JalaliDatePicker selectedDate={selectedDate} onChange={setSelectedDate} />
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4 pt-2">
@@ -727,7 +733,7 @@ export default function App() {
             <div className="p-8 rounded-3xl bg-[var(--card)] border border-[var(--border)] shadow-xl">
               <h2 className="text-3xl font-black text-white">تماس و اطلاعات دسترسی به درمانگاه پارسیان</h2>
               <p className="text-sm text-[var(--muted-foreground)] mt-2">
-                مرکز اورژانس شبانه‌روزی و کلینیک تخصصی در عباس‌آباد (روبروی شهرداری)
+                مرکز اورژانس شبانه‌روزی و کلینیک تخصصی در عباس‌آباد (خیابان امام، نبش کوچه شهید کلاهدوز)
               </p>
             </div>
 
@@ -739,7 +745,7 @@ export default function App() {
                     <MapPin className="size-5 text-amber-400 shrink-0 mt-0.5" />
                     <div>
                       <span className="block font-bold text-white">آدرس درمانگاه:</span>
-                      <span className="text-[var(--muted-foreground)]">مازندران، عباس‌آباد، خیابان اصلی ساحلی، روبروی شهرداری، درمانگاه شبانه‌روزی پارسیان</span>
+                      <span className="text-[var(--muted-foreground)]">مازندران، عباس‌آباد، خیابان امام، نبش کوچه شهید کلاهدوز، درمانگاه شبانه‌روزی پارسیان</span>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -836,7 +842,7 @@ export default function App() {
 
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[var(--muted-foreground)]">
             <p>© ۱۴۰۵ کلیه حقوق برای درمانگاه شبانه‌روزی پارسیان عباس‌آباد محفوظ است.</p>
-            <p>تلفن مستقیم: ۰۱۱۵۴۶۲۷۰۲۲ | مازندران، عباس‌آباد، روبروی شهرداری</p>
+            <p>تلفن مستقیم: ۰۱۱۵۴۶۲۷۰۲۲ | مازندران، عباس‌آباد، خیابان امام، نبش کوچه شهید کلاهدوز</p>
           </div>
         </div>
       </footer>
