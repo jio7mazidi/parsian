@@ -15,8 +15,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const { mobile, templateId, parameters } = req.body;
+  const targetTemplateId = templateId || process.env.SMS_IR_TEMPLATE_ID || 511359;
 
-  if (!mobile || !templateId) {
+  if (!mobile || !targetTemplateId) {
     return res.status(400).json({ error: 'Missing required parameters' });
   }
 
@@ -35,7 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
       body: JSON.stringify({
         mobile: mobile,
-        templateId: Number(templateId),
+        templateId: Number(targetTemplateId),
         parameters: parameters || [],
       }),
     });

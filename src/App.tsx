@@ -142,7 +142,7 @@ export default function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             mobile: patientPhone,
-            templateId: 100000, // شناسه قالب شما در SMS.ir
+            templateId: 511359,
             parameters: [
               { name: 'NAME', value: patientName },
               { name: 'SERVICE', value: selectedServiceObj ? selectedServiceObj.name : 'درمانگاه پارسیان' },
