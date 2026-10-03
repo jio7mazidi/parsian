@@ -106,6 +106,7 @@ export default function App() {
     const selectedServiceObj = ALL_SERVICES.find(s => s.id === selectedService);
 
     try {
+      // 1. Save to Supabase
       const { error } = await supabase.from('bookings').insert([
         {
           tracking_code: trackingCode,
@@ -121,6 +122,26 @@ export default function App() {
       if (error) {
         console.warn("Supabase save warning:", error.message);
       }
+
+      // 2. Trigger SMS via Vercel Serverless Function
+      try {
+        await fetch('/api/send-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mobile: patientPhone,
+            templateId: 100000, // شناسه قالب شما در SMS.ir
+            parameters: [
+              { name: 'NAME', value: patientName },
+              { name: 'SERVICE', value: selectedServiceObj ? selectedServiceObj.name : 'درمانگاه پارسیان' },
+              { name: 'CODE', value: trackingCode }
+            ]
+          })
+        });
+      } catch (smsErr) {
+        console.warn("SMS send trigger warning:", smsErr);
+      }
+
     } catch (err) {
       console.error("Connection error:", err);
     } finally {
