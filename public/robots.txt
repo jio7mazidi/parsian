@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jio7mazidi.github.io/parsian/sitemap.xml
+Sitemap: https://parsian.vercel.app/sitemap.xml

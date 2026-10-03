@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { 
   Stethoscope, Phone, Clock, MapPin, Calendar, Award, 
-  ChevronLeft, Menu, X, CheckCircle2, HeartPulse, Activity, User, 
-  Sparkles, Smile, ShieldCheck
+  ChevronLeft, Menu, X, CheckCircle2, HeartPulse, Activity, 
+  Sparkles, Smile, ShieldCheck, Car, Zap
 } from "lucide-react";
 import { cn } from "./lib/utils";
 import { formatJalali } from "./lib/jalali";
 import { isIranMobile } from "./lib/persian";
 import { supabase } from "./lib/supabase";
 import ReceptionPanel from "./components/ReceptionPanel";
+import RegionalCoverage from "./components/RegionalCoverage";
+import FAQSection from "./components/FAQSection";
 
 // Data
 const SERVICE_CATEGORIES = [
@@ -16,41 +18,41 @@ const SERVICE_CATEGORIES = [
     title: "اورژانس و خدمات پرستاری",
     icon: HeartPulse,
     items: [
-      { id: "emergency", name: "اورژانس شبانه‌روزی ۲۴ ساعته", desc: "تریاژ، نوار قلب و احیا تخصصی" },
-      { id: "nursing", name: "سرم‌تراپی و تزریقات", desc: "انجام کلیه خدمات تزریقات و پانسمان" },
-      { id: "surgery", name: "جراحی‌های سرپایی", desc: "بخیه، ختنه، برداشتن خال و توده‌های سطحی" },
+      { id: "emergency", name: "اورژانس شبانه‌روزی ۲۴ ساعته", desc: "تریاژ، نوار قلب و احیا تخصصی بدون تعطیلی" },
+      { id: "nursing", name: "سرم‌تراپی و تزریقات", desc: "انجام کلیه خدمات تزریقات، پانسمان و مراقبت پرستاری" },
+      { id: "surgery", name: "جراحی‌های سرپایی", desc: "بخیه، ختنه، برداشتن خال و توده‌های سطحی توسط پزشک" },
     ]
   },
   {
     title: "کلینیک تخصصی",
     icon: Stethoscope,
     items: [
-      { id: "ortho", name: "متخصص ارتوپدی", desc: "درمان آسیب‌های مفاصل و استخوان" },
-      { id: "gynecology", name: "متخصص زنان و زایمان", desc: "مراقبت‌های بارداری و چکاپ زنان" },
-      { id: "internal", name: "متخصص داخلی", desc: "درمان بیماری‌های گوارشی، غدد و ریه" },
-      { id: "cardio", name: "متخصص قلب و عروق", desc: "اکوکاردیوگرافی و تست ورزش" },
-      { id: "neurology", name: "متخصص مغز و اعصاب", desc: "درمان سردرد، تشنج و اختلالات مغزی" },
-      { id: "gastro", name: "فوق تخصص گوارش", desc: "آندوسکوپی و بیماری‌های کبد" },
-      { id: "nutrition", name: "تغذیه و کاهش وزن", desc: "رژیم‌های تخصصی درمانی و لاغری" },
+      { id: "ortho", name: "متخصص ارتوپدی", desc: "درمان آسیب‌های مفاصل، استخوان، شکستگی و دیسک" },
+      { id: "gynecology", name: "متخصص زنان و زایمان", desc: "مراقبت‌های بارداری، سونوگرافی و چکاپ تخصصی زنان" },
+      { id: "internal", name: "متخصص داخلی", desc: "درمان بیماری‌های گوارشی، دیابت، تیروئید، غدد و ریه" },
+      { id: "cardio", name: "متخصص قلب و عروق", desc: "اکوکاردیوگرافی، نوار قلب پیشرفته و تست ورزش" },
+      { id: "neurology", name: "متخصص مغز و اعصاب", desc: "درمان سردرد، میگرن، تشنج و اختلالات عصبی" },
+      { id: "gastro", name: "فوق تخصص گوارش و کبد", desc: "آندوسکوپی، کولونوسکوپی و بیماری‌های کبد چرب" },
+      { id: "nutrition", name: "تغذیه و کاهش وزن", desc: "رژیم‌های تخصصی درمانی، لاغری و تناسب اندام" },
     ]
   },
   {
     title: "پوست، مو و زیبایی",
     icon: Sparkles,
     items: [
-      { id: "filler", name: "فیلر و بوتاکس", desc: "تزریق بوتاکس و فیلر توسط پزشک متخصص" },
-      { id: "body-filler", name: "فیلر بادی", desc: "حجم‌دهی و فرم‌دهی بدن" },
-      { id: "meso", name: "مزوتراپی", desc: "تقویت مو و جوان‌سازی پوست" },
-      { id: "hifu", name: "هایفو (HIFU)", desc: "لیفتینگ صورت و بدن بدون جراحی" },
-      { id: "laser", name: "لیزر موهای زائد", desc: "استفاده از جدیدترین دستگاه‌های لیزر" },
+      { id: "filler", name: "فیلر و بوتاکس", desc: "تزریق بوتاکس و ژل با برندهای معتبر توسط پزشک" },
+      { id: "body-filler", name: "فیلر بادی", desc: "حجم‌دهی و فرم‌دهی بدن با ماندگاری بالا" },
+      { id: "meso", name: "مزوتراپی مو و پوست", desc: "تقویت مو، جلوگیری از ریزش و جوان‌سازی پوست" },
+      { id: "hifu", name: "هایفو (HIFU)", desc: "لیفتینگ صورت و گردن بدون جراحی و بدون درد" },
+      { id: "laser", name: "لیزر موهای زائد", desc: "جدیدترین دستگاه‌های لیزر بدون درد با کولینگ قوی" },
     ]
   },
   {
     title: "دندانپزشکی",
     icon: Smile,
     items: [
-      { id: "dental-general", name: "دندانپزشکی عمومی", desc: "ترمیم، عصب‌کشی و جرم‌گیری" },
-      { id: "dental-beauty", name: "اصلاح طرح لبخند", desc: "کامپوزیت، لمینت و بلیچینگ" },
+      { id: "dental-general", name: "دندانپزشکی عمومی", desc: "ترمیم، عصب‌کشی، جرم‌گیری و درمان ریشه" },
+      { id: "dental-beauty", name: "اصلاح طرح لبخند", desc: "کامپوزیت ونیر، لمینت سرامیکی و بلیچینگ" },
     ]
   }
 ];
@@ -59,27 +61,27 @@ const SERVICE_CATEGORIES = [
 const ALL_SERVICES = SERVICE_CATEGORIES.flatMap(cat => cat.items);
 
 const EMERGENCY_DOCTORS = [
-  { name: "دکتر محمد محبعلی", role: "پزشک عمومی اورژانس", desc: "مسئول شیفت اورژانس و احیا" },
-  { name: "دکتر جواد مزیدی", role: "پزشک عمومی اورژانس", desc: "پزشک کشیک اورژانس شبانه‌روزی" },
-  { name: "دکتر عباس رحیمی", role: "پزشک عمومی اورژانس", desc: "اورژانس و تریاژ پیشرفته" },
-  { name: "دکتر کریم جهانشاهی", role: "پزشک عمومی اورژانس", desc: "پزشک اورژانس و مدیریت تروما" },
-  { name: "دکتر مبین رضایی", role: "پزشک عمومی اورژانس", desc: "پزشک مقیم اورژانس" },
-  { name: "دکتر فروردین", role: "پزشک عمومی اورژانس", desc: "پزشک مقیم اورژانس" },
-  { name: "دکتر اسدی", role: "پزشک عمومی اورژانس", desc: "پزشک مقیم اورژانس" },
-  { name: "دکتر لطفعلی ثانی", role: "پزشک عمومی اورژانس", desc: "پزشک مقیم اورژانس" },
-  { name: "دکتر فتحعلی نژاد", role: "پزشک عمومی اورژانس", desc: "پزشک مقیم اورژانس" },
-  { name: "دکتر رهنورد", role: "پزشک عمومی اورژانس", desc: "پزشک مقیم اورژانس" },
+  { name: "دکتر محمد محبعلی", role: "پزشک مقیم اورژانس", desc: "مسئول شیفت اورژانس و احیا" },
+  { name: "دکتر جواد مزیدی", role: "پزشک مقیم اورژانس", desc: "پزشک کشیک اورژانس شبانه‌روزی" },
+  { name: "دکتر عباس رحیمی", role: "پزشک مقیم اورژانس", desc: "اورژانس و تریاژ پیشرفته" },
+  { name: "دکتر کریم جهانشاهی", role: "پزشک مقیم اورژانس", desc: "پزشک اورژانس و مدیریت تروما" },
+  { name: "دکتر مبین رضایی", role: "پزشک مقیم اورژانس", desc: "پزشک مقیم اورژانس" },
+  { name: "دکتر فروردین", role: "پزشک مقیم اورژانس", desc: "پزشک مقیم اورژانس" },
+  { name: "دکتر اسدی", role: "پزشک مقیم اورژانس", desc: "پزشک مقیم اورژانس" },
+  { name: "دکتر لطفعلی ثانی", role: "پزشک مقیم اورژانس", desc: "پزشک مقیم اورژانس" },
+  { name: "دکتر فتحعلی نژاد", role: "پزشک مقیم اورژانس", desc: "پزشک مقیم اورژانس" },
+  { name: "دکتر رهنورد", role: "پزشک مقیم اورژانس", desc: "پزشک مقیم اورژانس" },
 ];
 
 const SPECIALIST_DOCTORS = [
-  { name: "دکتر زانوسی", role: "متخصص ارتوپدی", days: ["شنبه"] },
-  { name: "دکتر علینژاد", role: "متخصص زنان و زایمان", days: ["یکشنبه"] },
-  { name: "دکتر نیک‌سیرت", role: "متخصص گوارش", days: ["دوشنبه"] },
-  { name: "دکتر شورمیج", role: "متخصص قلب و عروق", days: ["سه‌شنبه"] },
-  { name: "دکتر صالحی", role: "متخصص مغز و اعصاب", days: ["سه‌شنبه"] },
-  { name: "دکتر جورابراهیمیان", role: "متخصص داخلی", days: ["چهارشنبه"] },
-  { name: "دکتر جواد مزیدی", role: "تغذیه و کاهش وزن", days: ["طبق برنامه هفتگی"] },
-  { name: "دکتر محمد محبعلی", role: "زیبایی و جوان‌سازی", days: ["طبق برنامه هفتگی"] },
+  { name: "دکتر زانوسی", role: "متخصص ارتوپدی", days: ["شنبه‌ها"], serviceId: "ortho" },
+  { name: "دکتر علینژاد", role: "متخصص زنان و زایمان", days: ["یکشنبه‌ها"], serviceId: "gynecology" },
+  { name: "دکتر نیک‌سیرت", role: "فوق تخصص گوارش و کبد", days: ["دوشنبه‌ها"], serviceId: "gastro" },
+  { name: "دکتر شورمیج", role: "متخصص قلب و عروق", days: ["سه‌شنبه‌ها"], serviceId: "cardio" },
+  { name: "دکتر صالحی", role: "متخصص مغز و اعصاب", days: ["سه‌شنبه‌ها"], serviceId: "neurology" },
+  { name: "دکتر جورابراهیمیان", role: "متخصص داخلی", days: ["چهارشنبه‌ها"], serviceId: "internal" },
+  { name: "دکتر جواد مزیدی", role: "تغذیه و کاهش وزن", days: ["برنامه هفتگی"], serviceId: "nutrition" },
+  { name: "دکتر محمد محبعلی", role: "زیبایی و جوان‌سازی", days: ["برنامه هفتگی"], serviceId: "filler" },
 ];
 
 export default function App() {
@@ -166,16 +168,33 @@ export default function App() {
     }
   };
 
+  const selectDoctorAndBook = (serviceId: string) => {
+    setSelectedService(serviceId);
+    setActiveTab("booking");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col font-sans w-full max-w-none text-right">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col font-sans w-full max-w-none text-right clinical-ambient-emerald">
       {/* Emergency Strip */}
-      <div className="bg-red-950/60 text-red-200 border-b border-red-900/50 text-xs py-2.5 px-4">
+      <div className="bg-red-950/70 text-red-200 border-b border-red-900/50 text-xs py-2 px-4 shadow-sm">
         <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 font-bold">
+            <span className="relative flex size-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full size-2.5 bg-emerald-500"></span>
+            </span>
             <HeartPulse className="size-4 animate-pulse text-red-400" />
-            اورژانس شبانه‌روزی درمانگاه پارسیان عباس‌آباد (آماده‌باش ۲۴ ساعته)
+            <span>اورژانس شبانه‌روزی پارسیان عباس‌آباد · آماده‌باش ۲۴ ساعته بدون تعطیلی</span>
+            <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] bg-red-900/40 text-red-300 border border-red-800/40">
+              معین متل قو و نشتارود
+            </span>
           </div>
-          <a href="tel:01154627022" className="flex items-center gap-1.5 font-bold hover:underline" dir="ltr">
+          <a 
+            href="tel:01154627022" 
+            className="flex items-center gap-1.5 font-bold hover:text-white bg-red-900/50 hover:bg-red-900 px-3 py-1 rounded-full transition-all" 
+            dir="ltr"
+          >
             <Phone className="size-3.5" />
             <span>۰۱۱ ۵۴۶۲ ۷۰۲۲</span>
           </a>
@@ -183,33 +202,38 @@ export default function App() {
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-[var(--background)]/90 backdrop-blur border-b border-[var(--border)]">
+      <header className="sticky top-0 z-40 bg-[var(--background)]/90 backdrop-blur-md border-b border-[var(--border)] shadow-sm">
         <div className="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab("home")}>
-            <div className="size-11 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-xl">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => { setActiveTab("home"); window.location.hash = ""; }}>
+            <div className="size-11 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-xl border border-amber-500/30 shadow-inner">
               پ
             </div>
             <div>
-              <h1 className="text-lg font-black leading-tight">درمانگاه شبانه‌روزی پارسیان</h1>
-              <p className="text-xs text-[var(--muted-foreground)]">عباس‌آباد، مازندران</p>
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-black leading-tight">درمانگاه شبانه‌روزی پارسیان</h1>
+                <span className="hidden md:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                  ۲۴ ساعته
+                </span>
+              </div>
+              <p className="text-xs text-[var(--muted-foreground)]">عباس‌آباد · اورژانس متل قو و نشتارود</p>
             </div>
           </div>
 
           <nav className="hidden lg:flex items-center gap-1">
             {[
               { id: "home", label: "خانه" },
-              { id: "services", label: "خدمات" },
+              { id: "services", label: "خدمات کلینیک" },
               { id: "doctors", label: "پزشکان و متخصصان" },
               { id: "booking", label: "نوبت‌دهی آنلاین" },
-              { id: "contact", label: "تماس با ما" },
+              { id: "contact", label: "تماس و مسیریابی" },
             ].map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id as any)}
+                onClick={() => { setActiveTab(item.id as any); window.location.hash = ""; }}
                 className={cn(
                   "px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer",
                   activeTab === item.id 
-                    ? "bg-[var(--secondary)] text-[var(--foreground)] font-bold shadow-sm" 
+                    ? "bg-[var(--secondary)] text-[var(--foreground)] font-bold shadow-sm border border-[var(--border)]" 
                     : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--secondary)]/50"
                 )}
               >
@@ -220,15 +244,15 @@ export default function App() {
 
           <div className="flex items-center gap-3">
             <button 
-              onClick={() => setActiveTab("booking")}
-              className="hidden sm:inline-flex items-center gap-2 h-11 px-6 rounded-full bg-white text-black font-semibold text-sm hover:bg-white/90 transition-all cursor-pointer shadow-md"
+              onClick={() => { setActiveTab("booking"); window.location.hash = ""; }}
+              className="hidden sm:inline-flex items-center gap-2 h-11 px-6 rounded-full bg-white text-black font-black text-sm hover:bg-white/90 transition-all cursor-pointer shadow-lg shadow-white/10"
             >
               <Calendar className="size-4" />
               رزرو نوبت
             </button>
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg text-[var(--foreground)] hover:bg-[var(--secondary)]"
+              className="lg:hidden p-2 rounded-xl text-[var(--foreground)] hover:bg-[var(--secondary)] border border-[var(--border)]"
               aria-label="منو"
             >
               {mobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
@@ -240,10 +264,10 @@ export default function App() {
       {/* Mobile Sheet Menu */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setMobileMenuOpen(false)} />
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-xs" onClick={() => setMobileMenuOpen(false)} />
           <div className="relative w-80 bg-[var(--popover)] text-[var(--popover-foreground)] h-full shadow-2xl p-6 flex flex-col gap-4 z-10 border-e border-[var(--border)]">
             <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
-              <span className="font-bold text-lg">منوی پارسیان</span>
+              <span className="font-bold text-lg">منوی درمانگاه پارسیان</span>
               <button onClick={() => setMobileMenuOpen(false)} className="p-1 rounded-md hover:bg-[var(--accent)]">
                 <X className="size-5" />
               </button>
@@ -251,14 +275,14 @@ export default function App() {
             <div className="flex flex-col gap-2">
               {[
                 { id: "home", label: "خانه" },
-                { id: "services", label: "خدمات" },
-                { id: "doctors", label: "پزشکان" },
-                { id: "booking", label: "نوبت‌دهی" },
-                { id: "contact", label: "تماس" },
+                { id: "services", label: "خدمات کلینیک" },
+                { id: "doctors", label: "پزشکان و متخصصان" },
+                { id: "booking", label: "نوبت‌دهی آنلاین" },
+                { id: "contact", label: "تماس و مسیریابی" },
               ].map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => { setActiveTab(item.id as any); setMobileMenuOpen(false); }}
+                  onClick={() => { setActiveTab(item.id as any); setMobileMenuOpen(false); window.location.hash = ""; }}
                   className={cn(
                     "text-right px-4 py-3 rounded-xl text-sm font-medium transition-colors",
                     activeTab === item.id ? "bg-amber-500 text-black font-bold" : "hover:bg-[var(--accent)]"
@@ -277,7 +301,7 @@ export default function App() {
                   activeTab === "reception" ? "bg-amber-500 text-black" : "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
                 )}
               >
-                <span>پنل پذیرش منشی</span>
+                <span>ورود به پنل پذیرش منشی</span>
                 <ShieldCheck className="size-4" />
               </button>
             </div>
@@ -289,31 +313,67 @@ export default function App() {
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
         {activeTab === "home" && (
           <div className="space-y-16">
-            {/* Hero Section */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[var(--card)] to-[var(--secondary)] border border-[var(--border)] p-8 sm:p-14 shadow-xl text-right">
+            {/* Elevated Hero Section */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[var(--card)] via-[var(--card)] to-[var(--secondary)]/60 border border-[var(--border)] p-8 sm:p-14 shadow-2xl text-right">
               <div className="absolute -top-24 -left-24 size-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-              <div className="relative z-10 max-w-2xl space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold">
+              <div className="absolute bottom-0 right-1/3 size-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 max-w-3xl space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-400 text-xs font-bold border border-emerald-500/30">
+                  <span className="relative flex size-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-2 bg-emerald-500"></span>
+                  </span>
                   <Activity className="size-3.5" />
-                  خدمات پزشکی شبانه‌روزی در عباس‌آباد مازندران
+                  اورژانس شبانه‌روزی و کلینیک معین متل قو (سلمان‌شهر) و نشتارود
                 </div>
-                <h2 className="text-4xl sm:text-5xl font-black leading-tight tracking-tight">
-                  سلامتی شما، دغدغه‌ی شبانه‌روزی ماست
+
+                <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tight text-white">
+                  سلامتی شما، <br className="hidden sm:inline" />
+                  <span className="bg-gradient-to-r from-amber-400 via-amber-200 to-emerald-400 bg-clip-text text-transparent">
+                    دغدغه‌ی شبانه‌روزی ماست
+                  </span>
                 </h2>
+
                 <p className="text-base sm:text-lg text-[var(--muted-foreground)] leading-relaxed">
-                  درمانگاه شبانه‌روزی پارسیان با ۱۰ پزشک مقیم در اورژانس و متخصصان برجسته، آماده‌ی ارائه خدمات درمانی، زیبایی و دندانپزشکی به شما عزیزان است.
+                  درمانگاه شبانه‌روزی پارسیان عباس‌آباد با ۱۰ پزشک مقیم در اورژانس و برترین متخصصین پزشکی، نزدیک‌ترین مرکز درمانی و اورژانس ۲۴ ساعته به متل قو و نشتارود جهت کلیه خدمات درمانی، سرم‌تراپی، جراحی سرپایی، زیبایی و دندانپزشکی.
                 </p>
-                <div className="flex flex-wrap gap-4 pt-2 justify-start">
+
+                {/* Badges / Highlights */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-white/90">
+                    <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
+                    <span>۱۰ پزشک مقیم اورژانس</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-bold text-white/90">
+                    <Car className="size-4 text-amber-400 shrink-0" />
+                    <span>۵ تا ۱۰ دقیقه از متل قو و نشتارود</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-bold text-white/90">
+                    <Zap className="size-4 text-blue-400 shrink-0" />
+                    <span>تزریقات و سرم‌تراپی ۲۴ ساعته</span>
+                  </div>
+                </div>
+
+                {/* CTAs */}
+                <div className="flex flex-wrap gap-4 pt-4 justify-start items-center">
                   <button 
                     onClick={() => setActiveTab("booking")}
-                    className="h-12 px-8 rounded-full bg-white text-black font-bold text-sm hover:opacity-90 shadow-lg transition-all cursor-pointer flex items-center gap-2"
+                    className="h-12 px-8 rounded-full bg-white text-black font-black text-sm hover:bg-white/90 shadow-xl transition-all cursor-pointer flex items-center gap-2"
                   >
                     <Calendar className="size-4" />
                     رزرو نوبت آنلاین
                   </button>
+                  <a 
+                    href="tel:01154627022"
+                    className="h-12 px-6 rounded-full bg-red-600/90 hover:bg-red-600 text-white font-bold text-sm shadow-lg transition-all flex items-center gap-2"
+                  >
+                    <Phone className="size-4" />
+                    تماس اضطراری اورژانس
+                  </a>
                   <button 
                     onClick={() => setActiveTab("services")}
-                    className="h-12 px-8 rounded-full border border-[var(--border)] hover:bg-[var(--secondary)] font-semibold text-sm transition-colors cursor-pointer"
+                    className="h-12 px-6 rounded-full border border-[var(--border)] hover:bg-[var(--secondary)] font-semibold text-sm transition-colors cursor-pointer text-white/80 hover:text-white"
                   >
                     مشاهده تمامی خدمات
                   </button>
@@ -321,26 +381,74 @@ export default function App() {
               </div>
             </div>
 
-            {/* Emergency Doctors Preview */}
-            <div className="p-8 rounded-3xl bg-[var(--card)] border border-[var(--border)] space-y-6 text-right">
-              <div className="flex items-center justify-between">
+            {/* Regional Coverage Hub (SEO & Maps) */}
+            <RegionalCoverage />
+
+            {/* Specialist Doctors Highlights */}
+            <div className="p-8 rounded-3xl bg-[var(--card)] border border-[var(--border)] space-y-6 text-right shadow-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-2xl font-black">پزشکان مقیم اورژانس</h3>
-                  <p className="text-sm text-[var(--muted-foreground)] mt-1">حضور ۲۴ ساعته ۱۰ پزشک مجرب جهت فوریت‌های پزشکی</p>
+                  <h3 className="text-2xl font-black text-white flex items-center gap-2">
+                    <Award className="size-6 text-amber-400" />
+                    متخصصین کلینیک تخصصی پارسیان
+                  </h3>
+                  <p className="text-xs text-[var(--muted-foreground)] mt-1">برنامه حضور هفتگی متخصصان و امکان رزرو مستقیم نوبت</p>
                 </div>
-                <button onClick={() => setActiveTab("doctors")} className="text-sm font-semibold text-amber-400 hover:underline flex items-center gap-1">
-                   پزشکان اورژانس <ChevronLeft className="size-4" />
+                <button 
+                  onClick={() => setActiveTab("doctors")} 
+                  className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer"
+                >
+                  مشاهده همه پزشکان <ChevronLeft className="size-4" />
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                {EMERGENCY_DOCTORS.map((doc, idx) => (
-                  <div key={idx} className="p-4 rounded-xl bg-[var(--secondary)]/40 border border-[var(--border)] text-center space-y-2">
-                    <div className="size-10 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold mx-auto">
-                      <User className="size-5" />
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {SPECIALIST_DOCTORS.slice(0, 4).map((doc, idx) => (
+                  <div key={idx} className="p-5 rounded-2xl bg-[var(--secondary)]/40 border border-[var(--border)] flex flex-col justify-between hover:border-amber-500/40 transition-all space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                          {doc.days.join("، ")}
+                        </span>
+                      </div>
+                      <h4 className="font-black text-base text-white">{doc.name}</h4>
+                      <p className="text-xs text-[var(--muted-foreground)]">{doc.role}</p>
                     </div>
-                    <h5 className="font-bold text-[13px]">{doc.name}</h5>
-                    <span className="text-[10px] text-amber-400 block">پزشک اورژانس</span>
+                    <button
+                      onClick={() => selectDoctorAndBook(doc.serviceId)}
+                      className="w-full h-9 rounded-xl bg-white text-black font-bold text-xs hover:bg-white/90 transition-colors cursor-pointer flex items-center justify-center gap-1"
+                    >
+                      <Calendar className="size-3.5" />
+                      رزرو نوبت
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Emergency Doctors Preview */}
+            <div className="p-8 rounded-3xl bg-[var(--card)] border border-[var(--border)] space-y-6 text-right shadow-xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-black text-white flex items-center gap-2">
+                    <HeartPulse className="size-6 text-red-400" />
+                    کادر ۱۰ نفره پزشکان مقیم اورژانس
+                  </h3>
+                  <p className="text-xs text-[var(--muted-foreground)] mt-1">حضور ۲۴ ساعته ۱۰ پزشک مجرب جهت فوریت‌های پزشکی و تریاژ</p>
+                </div>
+                <button onClick={() => setActiveTab("doctors")} className="text-xs font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer">
+                  مشاهده کادر کامل <ChevronLeft className="size-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                {EMERGENCY_DOCTORS.map((doc, idx) => (
+                  <div key={idx} className="p-4 rounded-xl bg-[var(--secondary)]/40 border border-[var(--border)] text-center space-y-2 hover:border-amber-500/30 transition-all">
+                    <div className="size-11 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center font-black mx-auto text-sm border border-amber-500/20">
+                      {doc.name.replace("دکتر ", "")[0]}
+                    </div>
+                    <h5 className="font-bold text-xs text-white leading-tight">{doc.name}</h5>
+                    <span className="text-[10px] text-amber-400/90 block">پزشک مقیم اورژانس</span>
                   </div>
                 ))}
               </div>
@@ -349,31 +457,37 @@ export default function App() {
             {/* Quick Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { title: "پشتیبانی شبانه‌روزی", value: "۲۴ ساعته", icon: Clock },
+                { title: "پشتیبانی و تریاژ", value: "۲۴ ساعته شبانه‌روزی", icon: Clock },
                 { title: "کادر اورژانس", value: "۱۰ پزشک مقیم", icon: Stethoscope },
-                { title: "خدمات کلینیکی", value: "تخصصی و زیبایی", icon: Award },
-                { title: "تلفن تماس", value: "۰۱۱-۵۴۶۲۷۰۲۲", icon: Phone },
+                { title: "پوشش منطقه‌ای", value: "متل قو، نشتارود، عباس‌آباد", icon: Award },
+                { title: "تلفن پذیرش", value: "۰۱۱-۵۴۶۲۷۰۲۲", icon: Phone },
               ].map((stat, i) => {
                 const Icon = stat.icon;
                 return (
                   <div key={i} className="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] flex flex-col gap-2 shadow-sm text-right">
-                    <div className="size-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                    <div className="size-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
                       <Icon className="size-5" />
                     </div>
-                    <span className="text-xl font-black mt-2 leading-none" dir="ltr">{stat.value}</span>
+                    <span className="text-lg font-black mt-2 leading-none text-white">{stat.value}</span>
                     <span className="text-xs text-[var(--muted-foreground)]">{stat.title}</span>
                   </div>
                 );
               })}
             </div>
+
+            {/* FAQ Accordion */}
+            <FAQSection />
           </div>
         )}
 
+        {/* Services Tab */}
         {activeTab === "services" && (
           <div className="space-y-12 text-right">
-            <div>
-              <h2 className="text-3xl font-black">خدمات درمانی و زیبایی پارسیان</h2>
-              <p className="text-sm text-[var(--muted-foreground)] mt-2">جامع‌ترین مرکز درمانی عباس‌آباد مازندران</p>
+            <div className="p-8 rounded-3xl bg-[var(--card)] border border-[var(--border)] shadow-xl">
+              <h2 className="text-3xl font-black text-white">خدمات جامع درمانی، زیبایی و دندانپزشکی پارسیان</h2>
+              <p className="text-sm text-[var(--muted-foreground)] mt-2">
+                مجهزترین کلینیک تخصصی و اورژانس شبانه‌روزی غرب مازندران با دسترسی سریع برای مراجعین عباس‌آباد، متل قو (سلمان‌شهر) و نشتارود
+              </p>
             </div>
 
             <div className="space-y-16">
@@ -381,22 +495,28 @@ export default function App() {
                 const Icon = cat.icon;
                 return (
                   <div key={i} className="space-y-6">
-                    <div className="flex items-center gap-3 text-amber-400">
-                      <Icon className="size-6" />
-                      <h3 className="text-xl font-black">{cat.title}</h3>
+                    <div className="flex items-center gap-3 text-amber-400 border-b border-[var(--border)] pb-3">
+                      <div className="size-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                        <Icon className="size-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black text-white">{cat.title}</h3>
+                        <span className="text-xs text-[var(--muted-foreground)]">{cat.items.length} خدمت فعال</span>
+                      </div>
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {cat.items.map((s) => (
-                        <div key={s.id} className="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] flex flex-col justify-between hover:border-amber-500/50 transition-all">
+                        <div key={s.id} className="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] flex flex-col justify-between hover:border-amber-500/50 transition-all shadow-md group">
                           <div className="space-y-3">
-                            <h4 className="font-bold text-lg">{s.name}</h4>
+                            <h4 className="font-bold text-lg text-white group-hover:text-amber-400 transition-colors">{s.name}</h4>
                             <p className="text-xs text-[var(--muted-foreground)] leading-relaxed">{s.desc}</p>
                           </div>
                           <div className="pt-6 mt-6 border-t border-[var(--border)]">
                             <button 
                               onClick={() => { setSelectedService(s.id); setActiveTab("booking"); }}
-                              className="w-full h-10 rounded-full bg-white text-black font-bold text-xs hover:opacity-90 cursor-pointer"
+                              className="w-full h-10 rounded-xl bg-white text-black font-black text-xs hover:bg-white/90 transition-colors cursor-pointer flex items-center justify-center gap-2"
                             >
+                              <Calendar className="size-3.5" />
                               رزرو نوبت آنلاین
                             </button>
                           </div>
@@ -407,99 +527,132 @@ export default function App() {
                 );
               })}
             </div>
+
+            {/* Regional Coverage inside Services */}
+            <RegionalCoverage />
+
+            {/* FAQ inside Services */}
+            <FAQSection />
           </div>
         )}
 
+        {/* Doctors Tab */}
         {activeTab === "doctors" && (
           <div className="space-y-12 text-right">
-            <div>
-              <h2 className="text-3xl font-black">کادر پزشکی و متخصصین</h2>
-              <p className="text-sm text-[var(--muted-foreground)] mt-2">پزشکان مقیم و متخصصین آماده خدمت‌رسانی</p>
+            <div className="p-8 rounded-3xl bg-[var(--card)] border border-[var(--border)] shadow-xl">
+              <h2 className="text-3xl font-black text-white">کادر پزشکی و متخصصین درمانگاه پارسیان</h2>
+              <p className="text-sm text-[var(--muted-foreground)] mt-2">
+                تیم ۱۰ نفره پزشکان مقیم اورژانس به همراه پزشکان فوق تخصص و متخصص کلینیک
+              </p>
             </div>
 
-            <div className="space-y-8">
-              <h3 className="text-xl font-black flex items-center gap-2 text-amber-400 border-b border-[var(--border)] pb-2">
-                <HeartPulse className="size-6" /> کادر ۱۰ نفره پزشکان اورژانس
-              </h3>
+            {/* Emergency Doctors */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-2 text-amber-400 border-b border-[var(--border)] pb-3">
+                <HeartPulse className="size-6 text-red-400" />
+                <h3 className="text-xl font-black text-white">کادر ۱۰ نفره پزشکان مقیم اورژانس شبانه‌روزی</h3>
+              </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                 {EMERGENCY_DOCTORS.map((doc, i) => (
-                  <div key={i} className="p-5 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-center space-y-3">
-                    <div className="size-12 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto text-lg font-bold">
+                  <div key={i} className="p-5 rounded-2xl bg-[var(--card)] border border-[var(--border)] text-center space-y-3 shadow-md hover:border-amber-500/40 transition-all">
+                    <div className="size-14 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto text-xl font-black border border-amber-500/20">
                       {doc.name.replace("دکتر ", "")[0]}
                     </div>
                     <div>
-                      <h4 className="font-bold text-sm">{doc.name}</h4>
-                      <p className="text-[10px] text-[var(--muted-foreground)] mt-1">پزشک عمومی اورژانس</p>
+                      <h4 className="font-bold text-sm text-white">{doc.name}</h4>
+                      <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400">
+                        پزشک مقیم اورژانس
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="space-y-8 pt-8 border-t border-[var(--border)]">
-              <h3 className="text-xl font-black flex items-center gap-2 text-amber-400 border-b border-[var(--border)] pb-2">
-                <Award className="size-6" /> متخصصین کلینیک تخصصی
-              </h3>
+            {/* Specialists */}
+            <div className="space-y-6 pt-8 border-t border-[var(--border)]">
+              <div className="flex items-center gap-2 text-amber-400 border-b border-[var(--border)] pb-3">
+                <Award className="size-6 text-amber-400" />
+                <h3 className="text-xl font-black text-white">متخصصین کلینیک تخصصی پارسیان</h3>
+              </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {SPECIALIST_DOCTORS.map((doc, i) => (
-                  <div key={i} className="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] flex flex-col justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="size-12 rounded-full bg-[var(--secondary)] text-amber-400 flex items-center justify-center font-bold text-xl">
-                        {doc.name.replace("دکتر ", "")[0]}
+                  <div key={i} className="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] flex flex-col justify-between gap-5 shadow-md hover:border-amber-500/40 transition-all">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className="size-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xl border border-amber-500/30">
+                          {doc.name.replace("دکتر ", "")[0]}
+                        </div>
+                        <div className="text-right">
+                          <h4 className="font-bold text-base leading-tight text-white">{doc.name}</h4>
+                          <p className="text-xs text-amber-400 font-bold mt-0.5">{doc.role}</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <h4 className="font-bold text-base leading-tight">{doc.name}</h4>
-                        <p className="text-[11px] text-[var(--brand)] font-bold">{doc.role}</p>
+
+                      <div className="p-3 rounded-xl bg-[var(--secondary)]/60 text-xs flex items-center justify-between border border-[var(--border)]">
+                        <span className="text-[var(--muted-foreground)]">روزهای حضور:</span>
+                        <span className="font-bold text-white">{doc.days.join("، ")}</span>
                       </div>
                     </div>
-                    <div className="pt-3 border-t border-[var(--border)] flex items-center justify-between text-[11px]">
-                      <span className="text-[var(--muted-foreground)]">روز حضور:</span>
-                      <span className="font-bold text-[var(--foreground)] bg-[var(--secondary)] px-2 py-0.5 rounded-lg">{doc.days.join("، ")}</span>
-                    </div>
+
+                    <button
+                      onClick={() => selectDoctorAndBook(doc.serviceId)}
+                      className="w-full h-10 rounded-xl bg-white text-black font-black text-xs hover:bg-white/90 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Calendar className="size-3.5" />
+                      رزرو نوبت با {doc.name}
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Regional Coverage */}
+            <RegionalCoverage />
           </div>
         )}
 
+        {/* Booking Tab */}
         {activeTab === "booking" && (
           <div className="max-w-3xl mx-auto space-y-8 text-right">
-            <div>
-              <h2 className="text-3xl font-black">رزرو نوبت آنلاین</h2>
-              <p className="text-sm text-[var(--muted-foreground)] mt-2">درمانگاه پارسیان عباس‌آباد (بدون نیاز به پرداخت آنلاین)</p>
+            <div className="p-8 rounded-3xl bg-[var(--card)] border border-[var(--border)] shadow-xl">
+              <h2 className="text-3xl font-black text-white">سامانه نوبت‌دهی آنلاین درمانگاه پارسیان</h2>
+              <p className="text-sm text-[var(--muted-foreground)] mt-2">
+                نوبت‌دهی آسان، ذخیره قطعی در پایگاه داده ابری و ارسال آنی پیامک تایید نوبت به شماره موبایل شما
+              </p>
             </div>
 
             {bookingSuccess ? (
-              <div className="p-8 rounded-3xl bg-[var(--card)] border border-emerald-500/40 text-center space-y-6 shadow-xl">
-                <div className="size-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+              <div className="p-8 sm:p-12 rounded-3xl bg-[var(--card)] border border-emerald-500/40 text-center space-y-6 shadow-2xl">
+                <div className="size-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
                   <CheckCircle2 className="size-8" />
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-black">نوبت شما با موفقیت رزرو شد</h3>
-                  <p className="text-sm text-[var(--muted-foreground)]">کد پیگیری:</p>
-                  <div className="text-xl font-mono font-bold tracking-wider text-amber-400 bg-[var(--secondary)] py-3 px-6 rounded-xl inline-block">
+                <div className="space-y-3">
+                  <h3 className="text-2xl font-black text-white">نوبت شما با موفقیت ثبت شد</h3>
+                  <p className="text-xs text-emerald-400 font-bold">اطلاعات شما در سیستم پذیرش ذخیره گردید و پیامک تأیید صادر شد.</p>
+                  <p className="text-xs text-[var(--muted-foreground)]">کد پیگیری اختصاصی پرونده شما:</p>
+                  <div className="text-2xl font-mono font-black tracking-widest text-amber-400 bg-[var(--secondary)] py-3 px-8 rounded-2xl inline-block border border-amber-500/30">
                     {bookingSuccess}
                   </div>
                 </div>
-                <p className="text-xs text-[var(--muted-foreground)]">
-                  هماهنگی نهایی از طریق تماس یا پیامک انجام خواهد شد.
+                <p className="text-xs text-[var(--muted-foreground)] max-w-md mx-auto leading-relaxed">
+                  لطفاً کد پیگیری را به خاطر بسپارید. همکاران پذیرش درمانگاه جهت هماهنگی ساعت حضور با شما تماس خواهند گرفت.
                 </p>
                 <button 
                   onClick={() => { setBookingSuccess(null); setActiveTab("home"); }}
-                  className="h-11 px-8 rounded-full bg-white text-black font-bold text-sm cursor-pointer"
+                  className="h-11 px-8 rounded-full bg-white text-black font-black text-sm cursor-pointer hover:bg-white/90 transition-colors"
                 >
-                  بازگشت به خانه
+                  بازگشت به صفحه اصلی
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleBookingSubmit} className="p-8 rounded-3xl bg-[var(--card)] border border-[var(--border)] space-y-6 shadow-xl text-right">
-                <div className="space-y-3">
-                  <label className="block text-sm font-bold">۱. انتخاب نوع خدمت</label>
+              <form onSubmit={handleBookingSubmit} className="p-8 rounded-3xl bg-[var(--card)] border border-[var(--border)] space-y-6 shadow-2xl text-right">
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-white">۱. انتخاب پزشک یا خدمت مورد نظر:</label>
                   <select 
                     value={selectedService}
                     onChange={(e) => setSelectedService(e.target.value)}
-                    className="w-full h-12 px-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)] text-sm focus:outline-none focus:border-amber-500 text-right"
+                    className="w-full h-12 px-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)] text-xs font-bold focus:outline-none focus:border-amber-500 text-right cursor-pointer"
                   >
                     {ALL_SERVICES.map((s) => (
                       <option key={s.id} value={s.id}>
@@ -509,10 +662,10 @@ export default function App() {
                   </select>
                 </div>
 
-                <div className="space-y-3">
-                  <label className="block text-sm font-bold">۲. تاریخ مورد نظر</label>
-                  <div className="p-4 rounded-xl bg-[var(--secondary)]/50 border border-[var(--border)] flex items-center justify-between">
-                    <span className="font-bold text-sm">
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-white">۲. تاریخ مراجعه مد نظر:</label>
+                  <div className="p-4 rounded-xl bg-[var(--secondary)]/60 border border-[var(--border)] flex items-center justify-between">
+                    <span className="font-bold text-xs text-amber-400">
                       {formatJalali(selectedDate, { weekday: true, year: true })}
                     </span>
                     <input 
@@ -524,20 +677,20 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-6 pt-4">
+                <div className="grid sm:grid-cols-2 gap-4 pt-2">
                   <div className="space-y-2">
-                    <label className="block text-sm font-bold">نام بیمار</label>
+                    <label className="block text-xs font-bold text-white">نام و نام خانوادگی بیمار:</label>
                     <input 
                       type="text"
                       required
-                      placeholder="مثلاً علی رضایی"
+                      placeholder="مثلاً: علی رضایی"
                       value={patientName}
                       onChange={(e) => setPatientName(e.target.value)}
-                      className="w-full h-12 px-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)] text-sm focus:outline-none focus:border-amber-500 text-right"
+                      className="w-full h-12 px-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)] text-xs focus:outline-none focus:border-amber-500 text-right"
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-sm font-bold">شماره تماس</label>
+                    <label className="block text-xs font-bold text-white">شماره موبایل جهت دریافت پیامک:</label>
                     <input 
                       type="tel"
                       required
@@ -545,74 +698,95 @@ export default function App() {
                       placeholder="0911XXXXXXX"
                       value={patientPhone}
                       onChange={(e) => setPatientPhone(e.target.value)}
-                      className="w-full h-12 px-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)] text-sm text-right focus:outline-none focus:border-amber-500"
+                      className="w-full h-12 px-4 rounded-xl bg-[var(--secondary)] border border-[var(--border)] text-xs text-right focus:outline-none focus:border-amber-500"
                     />
                   </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 leading-relaxed">
+                  💡 پس از ثبت نوبت، پیامک تایید با کد رهگیری برای شما صادر شده و کارشناسان پذیرش درمانگاه پارسیان جهت هماهنگی ساعت دقیق حضور با شما تماس خواهند گرفت.
                 </div>
 
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full h-12 rounded-full bg-white text-black font-black text-base hover:opacity-95 shadow-lg transition-all cursor-pointer mt-4 disabled:opacity-50"
+                  className="w-full h-12 rounded-xl bg-amber-500 text-black font-black text-sm hover:bg-amber-400 shadow-xl shadow-amber-500/20 transition-all cursor-pointer disabled:opacity-50"
                 >
-                  {isSubmitting ? "در حال ثبت..." : "ثبت رزرو نوبت"}
+                  {isSubmitting ? "در حال ثبت نوبت و ارسال پیامک..." : "ثبت نهایی و دریافت کد رهگیری"}
                 </button>
               </form>
             )}
+
+            <RegionalCoverage />
           </div>
         )}
 
+        {/* Contact Tab */}
         {activeTab === "contact" && (
           <div className="space-y-8 max-w-4xl mx-auto text-right">
-            <div>
-              <h2 className="text-3xl font-black">تماس با ما</h2>
-              <p className="text-sm text-[var(--muted-foreground)] mt-2">مرکز درمانی پارسیان عباس‌آباد</p>
+            <div className="p-8 rounded-3xl bg-[var(--card)] border border-[var(--border)] shadow-xl">
+              <h2 className="text-3xl font-black text-white">تماس و اطلاعات دسترسی به درمانگاه پارسیان</h2>
+              <p className="text-sm text-[var(--muted-foreground)] mt-2">
+                مرکز اورژانس شبانه‌روزی و کلینیک تخصصی در عباس‌آباد (روبروی شهرداری)
+              </p>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-6">
-              <div className="p-8 rounded-3xl bg-[var(--card)] border border-[var(--border)] space-y-6">
-                <h3 className="text-xl font-bold">اطلاعات مرکز</h3>
-                <div className="space-y-5 text-sm">
+              <div className="p-8 rounded-3xl bg-[var(--card)] border border-[var(--border)] space-y-6 shadow-xl">
+                <h3 className="text-xl font-bold text-white">اطلاعات مرکز</h3>
+                <div className="space-y-5 text-xs sm:text-sm">
                   <div className="flex items-start gap-3">
                     <MapPin className="size-5 text-amber-400 shrink-0 mt-0.5" />
                     <div>
-                      <span className="block font-bold">آدرس:</span>
-                      <span className="text-[var(--muted-foreground)]">مازندران، عباس‌آباد، خیابان اصلی، روبروی شهرداری، درمانگاه پارسیان</span>
+                      <span className="block font-bold text-white">آدرس درمانگاه:</span>
+                      <span className="text-[var(--muted-foreground)]">مازندران، عباس‌آباد، خیابان اصلی ساحلی، روبروی شهرداری، درمانگاه شبانه‌روزی پارسیان</span>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Phone className="size-5 text-amber-400 shrink-0 mt-0.5" />
                     <div>
-                      <span className="block font-bold">تلفن مستقیم:</span>
-                      <span className="text-[var(--muted-foreground)] font-bold text-lg" dir="ltr">۰۱۱ ۵۴۶۲ ۷۰۲۲</span>
+                      <span className="block font-bold text-white">تلفن مستقیم و شبانه‌روزی:</span>
+                      <a href="tel:01154627022" className="text-amber-400 hover:underline font-bold text-base block mt-0.5" dir="ltr">
+                        ۰۱۱ ۵۴۶۲ ۷۰۲۲
+                      </a>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <Clock className="size-5 text-amber-400 shrink-0 mt-0.5" />
                     <div>
-                      <span className="block font-bold">ساعت پذیرش:</span>
-                      <span className="text-[var(--muted-foreground)]">شبانه‌روزی (۲۴ ساعته) بدون تعطیلی</span>
+                      <span className="block font-bold text-white">ساعت پذیرش اورژانس:</span>
+                      <span className="text-emerald-400 font-bold">۲۴ ساعته شبانه‌روزی، بدون تعطیلی</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-8 rounded-3xl bg-[var(--card)] border border-[var(--border)] flex flex-col justify-between space-y-6">
+              <div className="p-8 rounded-3xl bg-gradient-to-br from-red-950/40 to-[var(--card)] border border-red-900/50 flex flex-col justify-between space-y-6 shadow-xl">
                 <div className="space-y-3">
-                  <h3 className="text-xl font-bold text-red-400">اورژانس و فوریت</h3>
-                  <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">
-                    تیم اورژانس درمانگاه پارسیان با حضور پزشکان مقیم و کادر پرستاری آماده خدمت‌رسانی در کلیه سوانح و فوریت‌های پزشکی می‌باشد.
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-xs font-bold border border-red-500/30">
+                    <HeartPulse className="size-3.5 animate-pulse text-red-400" />
+                    اورژانس و فوریت‌های پزشکی
+                  </div>
+                  <h3 className="text-xl font-bold text-red-400">تماس مستقیم با اورژانس پارسیان</h3>
+                  <p className="text-xs text-[var(--muted-foreground)] leading-relaxed">
+                    تیم اورژانس پارسیان با حضور ۱۰ پزشک مقیم، تریاژ و کادر مجرب پرستاری آماده خدمت‌رسانی فوری در کلیه سوانح، تروما، بخیه و فوریت‌ها برای شهروندان عباس‌آباد، متل قو و نشتارود می‌باشد.
                   </p>
                 </div>
                 <a 
                   href="tel:01154627022"
-                  className="h-12 rounded-full bg-red-600 text-white font-bold flex items-center justify-center gap-2 shadow-lg hover:bg-red-700 transition-colors"
+                  className="h-12 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg transition-colors cursor-pointer"
                 >
                   <Phone className="size-4" />
-                  تماس با اورژانس پارسیان
+                  برقراری تماس فوری (۰۱۱۵۴۶۲۷۰۲۲)
                 </a>
               </div>
             </div>
+
+            {/* Regional Coverage Component */}
+            <RegionalCoverage />
+
+            {/* FAQ Accordion */}
+            <FAQSection />
           </div>
         )}
 
@@ -628,30 +802,41 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--border)] bg-[var(--card)]/50 mt-16 py-10">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6 text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider">
-          <div className="flex items-center gap-3">
-            <div className="size-6 rounded bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
-              پ
+      <footer className="border-t border-[var(--border)] bg-[var(--card)]/80 mt-16 py-12">
+        <div className="max-w-6xl mx-auto px-4 space-y-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-[var(--border)]">
+            <div className="flex items-center gap-3">
+              <div className="size-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-lg border border-amber-500/30">
+                پ
+              </div>
+              <div>
+                <span className="font-black text-base text-white block">درمانگاه شبانه‌روزی پارسیان عباس‌آباد</span>
+                <span className="text-xs text-[var(--muted-foreground)]">مرکز درمانی و اورژانس شبانه‌روزی معین متل قو و نشتارود</span>
+              </div>
             </div>
-            <span>درمانگاه شبانه‌روزی پارسیان عباس‌آباد · ۱۴۰۵</span>
+
+            <div className="flex flex-wrap gap-4 sm:gap-6 items-center text-xs">
+              <button onClick={() => { setActiveTab("home"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">خانه</button>
+              <button onClick={() => { setActiveTab("services"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">خدمات</button>
+              <button onClick={() => { setActiveTab("doctors"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">پزشکان</button>
+              <button onClick={() => { setActiveTab("booking"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">نوبت‌دهی</button>
+              <button onClick={() => { setActiveTab("contact"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">تماس و مسیریابی</button>
+              <button 
+                onClick={() => {
+                  setActiveTab("reception");
+                  window.location.hash = "reception";
+                }} 
+                className="flex items-center gap-1 text-amber-400 hover:text-amber-300 font-bold cursor-pointer px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20"
+              >
+                <ShieldCheck className="size-3.5" />
+                پنل پذیرش منشی
+              </button>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-4 sm:gap-6 items-center">
-            <button onClick={() => { setActiveTab("home"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">خانه</button>
-            <button onClick={() => { setActiveTab("services"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">خدمات</button>
-            <button onClick={() => { setActiveTab("doctors"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">پزشکان</button>
-            <button onClick={() => { setActiveTab("booking"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">نوبت‌دهی</button>
-            <button onClick={() => { setActiveTab("contact"); window.location.hash = ""; }} className="hover:text-amber-400 cursor-pointer">تماس</button>
-            <button 
-              onClick={() => {
-                setActiveTab("reception");
-                window.location.hash = "reception";
-              }} 
-              className="flex items-center gap-1 text-amber-400/80 hover:text-amber-300 font-bold cursor-pointer"
-            >
-              <ShieldCheck className="size-3.5" />
-              پنل پذیرش منشی
-            </button>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[var(--muted-foreground)]">
+            <p>© ۱۴۰۵ کلیه حقوق برای درمانگاه شبانه‌روزی پارسیان عباس‌آباد محفوظ است.</p>
+            <p>تلفن مستقیم: ۰۱۱۵۴۶۲۷۰۲۲ | مازندران، عباس‌آباد، روبروی شهرداری</p>
           </div>
         </div>
       </footer>
